@@ -342,6 +342,12 @@ sub _locate_package_name {
         $name    = $spec_name;
     }
 
+    $package .= '::FORM_VALIDATOR_TINY_SPECIFICATION';
+    {
+        no strict 'refs';
+        ${ $package } //= {};
+    }
+
     ($package, $name);
 }
 
