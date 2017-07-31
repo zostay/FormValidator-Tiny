@@ -18,5 +18,5 @@ script:
   - dzil cover -test
 
 after_success:
-  - dzil cover -report coveralls
-  - dzil cover -report codecov
+  - cover -report coveralls
+  - cover -report codecov
