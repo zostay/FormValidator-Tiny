@@ -31,148 +31,6 @@ BEGIN {
 
 # ABSTRACT: A tiny form validator
 
-=head1 SYNOPSIS
-
-    use FormValidator::Tiny;
-    use Email::Valid;   # <-- for demonstration, not required
-    use Email::Address; # <-- for demonstration, not required
-    use Types::Standard qw( Int ); # <-- for demonstration, not required
-
-    validation_spec edit_user => [
-        login_name => [
-            required => 1,
-            must     => limit_character_set('_', 'a-z', 'A-Z', '0-9'),
-            must     => length_in_range(5, 16),
-        ],
-        name => [
-            required => 1,
-            must     => length_in_range(1, 100),
-        ],
-        age => [
-            optional => 1,
-            into     => '+',
-            must     => Int,
-            must     => number_in_range(13, '*'),
-        ],
-        password => [
-            required => 1,
-            must     => length_in_range(8, 72),
-        ],
-        confirm_password => [
-            required => 1,
-            must     => equal_to('password'),
-        ],
-        email => [
-            required => 1,
-            must     => length_in_range(5, 250),
-            must     => sub { (
-                            !!Email::Valid->address($_),
-                            "That is not a well-formed email address."
-                        ) },
-            into     => 'Email::Address',
-        ],
-        groups => [
-            optional  => 1,
-            into      => split_by(' '),
-            into      => '[]',
-            each_must => length_in_range(3, 20),
-            each_must => limit_character_set(
-                             ['_', 'a-z', 'A-Z'],
-                             ['_', '-', 'a-z', 'A-Z', '0-9'],
-                         ),
-        ],
-        tags   => [
-            optional   => 1,
-            into       => split_by(/\s*,\s*/),
-            each_into  => split_by(/\s\*:\s*/, 2),
-            into       => '{}',
-            key_must   => length_in_range(3, 20),
-            key_must   => qr/^(?:[A-Z][a-z0-9]*)(?:-[A-Z][a-z0-9]*)*)$/,
-            with_error => 'Tags keys must be of a form like "Favorite" or "Welcome-Message".',
-            value_must => length_in_range(1, 500),
-            value_must => limit_character_set('_', '-', 'a-z', 'A-Z', '0-9'),
-        ],
-    ];
-
-    # Somehow your web framework gets you a set of form parameters submitted by
-    # POST or whatever. GO!
-    my $params = web_framework_params_method();
-    my ($parsed_params, $errors) = validate edit_user => $params;
-
-    # You probably want better error handling
-    if ($errors) {
-        for my $field (keys %$errors) {
-            print "Error in $field: $_\n" for @{ $errors->{$field} };
-        }
-    }
-
-    # Form fields are valid, take action!
-    else {
-        do_the_thing(%$parased_params);
-    }
-
-=head1 DESCRIPTION
-
-There are lots for form validators, but this one aims to be the one that just
-one thing and does it well without involving anything else if it can. If you
-just need a small form validator without installing all of CPAN, this will do
-that. If you want to install all of CPAN and use a readable form validation spec
-syntax, I hope this will do that too.
-
-This module requires Perl 5.18 or better as of this writing.
-
-=head1 EXPORTED FUNCTIONS
-
-=head2 validation_spec
-
-    validation_spec $spec_name => \@spec;
-
-This defines a validation specification. It associates a specification named
-C<$spec_name> with the current package. Any use of C<validate> within the
-current package will use specifications named within the current package. The
-following example would work fine as the "edit" spec defined in each controller
-is in their respective package namespaces.
-
-    package MyApp::Controller::User;
-    validation_spec edit => [ ... ];
-    sub process_edits {
-        my ($self, $c) = @_;
-        my ($p, $e) = validate edit => $c->req->body_parameters;
-        ...
-    }
-
-    package MyApp::Controller::Page;
-    validation_spec edit => [ ... ];
-    sub process_edits {
-        my ($self, $c) = @_;
-        my ($p, $e) = validate edit => $c->req->body_parameters;
-        ...
-    }
-
-If you want to define them into a different package, name the package as part of
-the spec. Similarly, you can validate using a spec defined in a different
-package by naming the package when calling L</validate>:
-
-    package MyApp::Forms;
-    validation_spec MyApp::Controller::User::edit => [ ... ];
-
-    package MyApp::Controller::User;
-    sub process_groups {
-        my ($self, $c) = @_;
-        my ($p, $e) = validate MyApp::Controller::UserGroup::edit => $c->req->body_parameters;
-        ...
-    }
-
-You can also define your validation specification as lexical variables instead:
-
-    my $spec = validation_spec [ ... ];
-    my ($p, $e) = validate $spec, $c->req->body_parameters;
-
-For information about how to craft a spec, see the L</VALIDATION SPECIFICATIONS>
-section.
-
-=cut
-
 my %coercer = (
     '+'     => sub { (1, '', 0+$_[0]) },
     '?'     => sub { (1, '', length($_[0]) > 0) },
@@ -485,30 +343,6 @@ sub validation_spec($;$) {
     return $finished_spec;
 }
 
-=head2 validate
-
-    my ($params, $errors) = validate $spec, $input_parameters;
-
-Compares the given parameters agains the named spec. The C<$input_parameters>
-may be provided as either a hash or an array of alternating key-value pairs. All
-keys and values must be provided as strings.
-
-The method returns two values. The first, C<$params>, is the parameters as far
-as they have been validated so far. The second, C<$errors> is the errors that
-have been detected.
-
-The C<$params> will be provided as a hash. The keys of this hash will match the
-keys given in the spec. Some keys may be missing if the provided
-C<$input_parameters> did not contain values or those values are invalid.
-
-If there are no errors, the C<$errors> value will be set to C<undef>. With
-errors, this will be hash of arrays. The keys of the hash will also match the
-keys in the spec. Only fields with a validation error will be set. Each value
-is an array of strings, with each string being an error message describing a
-validation failure.
-
-=cut
-
 sub validate($$) {
     my ($name, $input) = @_;
     my @input = _listy($input);
@@ -570,22 +404,6 @@ sub validate($$) {
     my $errors = scalar keys %errors ? \%errors : undef;
     return (\%params, $errors);
 }
-
-=head2 limit_character_set
-
-    must => limit_character_set(@sets)
-    must => limit_character_set(\@fc_sets, \@rc_sets);
-
-This returns a subroutine that limits the allowed characters for an input. In
-the first form, the character set limits are applied to all characters in the
-value. In the second, the first array limits the characters permitted for the
-first character and the second limits the characters permitted for the rest.
-
-Character sets may be provided as single letters (e.g., "_"), as named unicode
-character properties wrapped in square brackets (e.g., "[Uppercase_Letter]"), or
-as ranges connected by a hyphen (e.g., "a-z").
-
-=cut
 
 sub _comma_and {
     if (@_ == 0) {
@@ -657,18 +475,6 @@ sub limit_character_set {
     }
 }
 
-=head2 length_in_range
-
-    must => length_in_range('*', 10)
-    must => length_in_range(10, '*')
-    must => length_in_range(10, 100)
-
-This returns a subroutine for use with C<must> declarations that asserts the
-minimum and maximum string character length permitted for a value. Use an
-asterisk to define no limit.
-
-=cut
-
 sub length_in_range {
     my ($start, $stop) = @_;
 
@@ -704,15 +510,6 @@ sub length_in_range {
     }
 }
 
-=head2 equal_to
-
-    must => equal_to('field')
-
-This returns a subroutine for use with C<must> declarations that asserts that
-the value must be exactly equal to another field in the input.
-
-=cut
-
 sub equal_to {
     my ($field_name) = @_;
 
@@ -720,17 +517,6 @@ sub equal_to {
         ($_[0] eq $_[1]{ $field_name }, "The value must match $field_name.")
     }
 }
-
-=head2 number_in_range
-
-    must => number_in_range('*', 100)
-    must => number_in_range(100, '*')
-    must => number_in_range(100, 500)
-    must => number_in_range(exclusive => 100, exclusive => 500)
-
-Returns a predicate for must that requires the integer to be within the given range. The endpoints are inclusive by default. You can add the word "exclusive" before a value to make the comparison exclusive instead. Using a '*' indicates no limit at that end of the range.
-
-=cut
 
 sub number_in_range {
     my $start = shift;
@@ -772,6 +558,225 @@ sub number_in_range {
     }
 }
 
+sub split_by {
+    my ($by, $count) = @_;
+    sub { [ split $_[0], $by, $count ] }
+}
+
+sub trim {
+    my $only = shift // 'both';
+    return sub { s/^\s+//; s/\s+$//r } if $only eq 'both';
+    return sub { s/^\s+//r }           if $only eq 'left';
+    return sub { s/\s+$//r }           if $only eq 'right';
+    die qq[unknown trim option [$only], expected "both" or "left" or "right"];
+}
+
+1;
+
+__END__
+
+=head1 SYNOPSIS
+
+    use FormValidator::Tiny;
+    use Email::Valid;   # <-- for demonstration, not required
+    use Email::Address; # <-- for demonstration, not required
+    use Types::Standard qw( Int ); # <-- for demonstration, not required
+
+    validation_spec edit_user => [
+        login_name => [
+            required => 1,
+            must     => limit_character_set('_', 'a-z', 'A-Z', '0-9'),
+            must     => length_in_range(5, 16),
+        ],
+        name => [
+            required => 1,
+            must     => length_in_range(1, 100),
+        ],
+        age => [
+            optional => 1,
+            into     => '+',
+            must     => Int,
+            must     => number_in_range(13, '*'),
+        ],
+        password => [
+            required => 1,
+            must     => length_in_range(8, 72),
+        ],
+        confirm_password => [
+            required => 1,
+            must     => equal_to('password'),
+        ],
+        email => [
+            required => 1,
+            must     => length_in_range(5, 250),
+            must     => sub { (
+                            !!Email::Valid->address($_),
+                            "That is not a well-formed email address."
+                        ) },
+            into     => 'Email::Address',
+        ],
+        groups => [
+            optional  => 1,
+            into      => split_by(' '),
+            into      => '[]',
+            each_must => length_in_range(3, 20),
+            each_must => limit_character_set(
+                             ['_', 'a-z', 'A-Z'],
+                             ['_', '-', 'a-z', 'A-Z', '0-9'],
+                         ),
+        ],
+        tags   => [
+            optional   => 1,
+            into       => split_by(/\s*,\s*/),
+            each_into  => split_by(/\s\*:\s*/, 2),
+            into       => '{}',
+            key_must   => length_in_range(3, 20),
+            key_must   => qr/^(?:[A-Z][a-z0-9]*)(?:-[A-Z][a-z0-9]*)*)$/,
+            with_error => 'Tags keys must be of a form like "Favorite" or "Welcome-Message".',
+            value_must => length_in_range(1, 500),
+            value_must => limit_character_set('_', '-', 'a-z', 'A-Z', '0-9'),
+        ],
+    ];
+
+    # Somehow your web framework gets you a set of form parameters submitted by
+    # POST or whatever. GO!
+    my $params = web_framework_params_method();
+    my ($parsed_params, $errors) = validate edit_user => $params;
+
+    # You probably want better error handling
+    if ($errors) {
+        for my $field (keys %$errors) {
+            print "Error in $field: $_\n" for @{ $errors->{$field} };
+        }
+    }
+
+    # Form fields are valid, take action!
+    else {
+        do_the_thing(%$parased_params);
+    }
+
+=head1 DESCRIPTION
+
+There are lots for form validators, but this one aims to be the one that just
+one thing and does it well without involving anything else if it can. If you
+just need a small form validator without installing all of CPAN, this will do
+that. If you want to install all of CPAN and use a readable form validation spec
+syntax, I hope this will do that too.
+
+This module requires Perl 5.18 or better as of this writing.
+
+=head1 EXPORTED FUNCTIONS
+
+=head2 validation_spec
+
+    validation_spec $spec_name => \@spec;
+
+This defines a validation specification. It associates a specification named
+C<$spec_name> with the current package. Any use of C<validate> within the
+current package will use specifications named within the current package. The
+following example would work fine as the "edit" spec defined in each controller
+is in their respective package namespaces.
+
+    package MyApp::Controller::User;
+    validation_spec edit => [ ... ];
+    sub process_edits {
+        my ($self, $c) = @_;
+        my ($p, $e) = validate edit => $c->req->body_parameters;
+        ...
+    }
+
+    package MyApp::Controller::Page;
+    validation_spec edit => [ ... ];
+    sub process_edits {
+        my ($self, $c) = @_;
+        my ($p, $e) = validate edit => $c->req->body_parameters;
+        ...
+    }
+
+If you want to define them into a different package, name the package as part of
+the spec. Similarly, you can validate using a spec defined in a different
+package by naming the package when calling L</validate>:
+
+    package MyApp::Forms;
+    validation_spec MyApp::Controller::User::edit => [ ... ];
+
+    package MyApp::Controller::User;
+    sub process_groups {
+        my ($self, $c) = @_;
+        my ($p, $e) = validate MyApp::Controller::UserGroup::edit => $c->req->body_parameters;
+        ...
+    }
+
+You can also define your validation specification as lexical variables instead:
+
+    my $spec = validation_spec [ ... ];
+    my ($p, $e) = validate $spec, $c->req->body_parameters;
+
+For information about how to craft a spec, see the L</VALIDATION SPECIFICATIONS>
+section.
+
+=head2 validate
+
+    my ($params, $errors) = validate $spec, $input_parameters;
+
+Compares the given parameters agains the named spec. The C<$input_parameters>
+may be provided as either a hash or an array of alternating key-value pairs. All
+keys and values must be provided as strings.
+
+The method returns two values. The first, C<$params>, is the parameters as far
+as they have been validated so far. The second, C<$errors> is the errors that
+have been detected.
+
+The C<$params> will be provided as a hash. The keys of this hash will match the
+keys given in the spec. Some keys may be missing if the provided
+C<$input_parameters> did not contain values or those values are invalid.
+
+If there are no errors, the C<$errors> value will be set to C<undef>. With
+errors, this will be hash of arrays. The keys of the hash will also match the
+keys in the spec. Only fields with a validation error will be set. Each value
+is an array of strings, with each string being an error message describing a
+validation failure.
+
+=head2 limit_character_set
+
+    must => limit_character_set(@sets)
+    must => limit_character_set(\@fc_sets, \@rc_sets);
+
+This returns a subroutine that limits the allowed characters for an input. In
+the first form, the character set limits are applied to all characters in the
+value. In the second, the first array limits the characters permitted for the
+first character and the second limits the characters permitted for the rest.
+
+Character sets may be provided as single letters (e.g., "_"), as named unicode
+character properties wrapped in square brackets (e.g., "[Uppercase_Letter]"), or
+as ranges connected by a hyphen (e.g., "a-z").
+
+=head2 length_in_range
+
+    must => length_in_range('*', 10)
+    must => length_in_range(10, '*')
+    must => length_in_range(10, 100)
+
+This returns a subroutine for use with C<must> declarations that asserts the
+minimum and maximum string character length permitted for a value. Use an
+asterisk to define no limit.
+
+=head2 equal_to
+
+    must => equal_to('field')
+
+This returns a subroutine for use with C<must> declarations that asserts that
+the value must be exactly equal to another field in the input.
+
+=head2 number_in_range
+
+    must => number_in_range('*', 100)
+    must => number_in_range(100, '*')
+    must => number_in_range(100, 500)
+    must => number_in_range(exclusive => 100, exclusive => 500)
+
+Returns a predicate for must that requires the integer to be within the given range. The endpoints are inclusive by default. You can add the word "exclusive" before a value to make the comparison exclusive instead. Using a '*' indicates no limit at that end of the range.
+
 =head2 split_by
 
     into => split_by(' ')
@@ -782,13 +787,6 @@ sub number_in_range {
 Returns an into filter that splits the string into an array. The arguments are
 similar to those accepted by Perl's built-in C<split>.
 
-=cut
-
-sub split_by {
-    my ($by, $count) = @_;
-    sub { [ split $_[0], $by, $count ] }
-}
-
 =head2 trim
 
     into => trim
@@ -797,16 +795,6 @@ sub split_by {
 
 Returns an into filter that trims whitespace from the input value. You can
 provide an argument to trim only the left whitespace or the right whitespace.
-
-=cut
-
-sub trim {
-    my $only = shift // 'both';
-    return sub { s/^\s+//; s/\s+$//r } if $only eq 'both';
-    return sub { s/^\s+//r }           if $only eq 'left';
-    return sub { s/\s+$//r }           if $only eq 'right';
-    die qq[unknown trim option [$only], expected "both" or "left" or "right"];
-}
 
 =head1 VALIDATION SPECIFICATIONS
 
@@ -1120,4 +1108,3 @@ representation of this variable will stay the same in future releases.
 
 =cut
 
-1;
