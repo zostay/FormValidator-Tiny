@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+use v5.18;
+use warnings FATAL => 'all';
 use Test2::V0;
 
 use FormValidator::Tiny;
