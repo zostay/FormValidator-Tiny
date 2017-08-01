@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/zostay/FormValidator-Tiny.svg?branch=master)](https://travis-ci.org/zostay/FormValidator-Tiny)
 [![Coverage Status](https://coveralls.io/repos/zostay/FormValidator-Tiny/badge.svg?branch=master)](https://coveralls.io/r/zostay/FormValidator-Tiny?branch=master)
+[![GitHub issues](https://img.shields.io/github/issues/zostay/FormValidator-Tiny.svg)](https://github.com/zostay/FormValidator-Tiny/issues)
+[![Kwalitee status](http://cpants.cpanauthors.org/dist/FormValidator-Tiny.png)](http://cpants.charsbar.org/dist/overview/FormValidator-Tiny)
 
 # NAME
 
