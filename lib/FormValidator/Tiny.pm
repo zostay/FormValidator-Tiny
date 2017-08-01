@@ -77,6 +77,7 @@ sub _type_coercer {
 sub _sub_validator {
     my ($sub) = @_;
     sub {
+        return (1, '', $_[0]) unless defined $_[0];
         local $_ = $_[0];
         my ($valid, $error) = $sub->(@_);
         ($valid, $error, $_[0]);
@@ -87,6 +88,7 @@ sub _re_validator {
     my ($re) = @_;
     sub {
         my ($value) = @_;
+        return (1, '', $value) unless defined $value;
         my $valid = $value =~ /$re/;
         ($valid, 'The value given is not correct.', $value);
     };
@@ -100,6 +102,7 @@ sub _type_validator {
 
         return sub {
             my ($value) = @_;
+            return (1, '', $value) unless defined $value;
             my $valid = $type->check($value);
             ($valid, $message, $value);
         }
@@ -107,6 +110,7 @@ sub _type_validator {
     elsif ($type->can('validate')) {
         return sub {
             my ($value) = @_;
+            return (1, '', $value) unless defined $value;
             my $message = $type->validate($value);
             (!defined $message, $message//'', $value);
         }
