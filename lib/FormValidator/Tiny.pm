@@ -95,7 +95,7 @@ sub _re_validator {
 sub _type_validator {
     my ($type) = @_;
     if ($type->can('check')) {
-        my $message = $type->can('get_message') ? sub { $type->get_message($_) }
+        my $message = $type->can('get_message') ? sub { $type->get_message($_[0]) }
                     :                             'The value given is not correct.';
 
         return sub {
@@ -298,7 +298,7 @@ sub validation_spec($;$) {
                     $must_sub = _re_validator($arg);
                 }
                 elsif (blessed $arg && ($arg->can('check') || $arg->can('validate'))) {
-                    $must_sub = _type_validtor($arg);
+                    $must_sub = _type_validator($arg);
                 }
                 else {
                     $error->("has unknown [$op] declaration argument [$arg]");
@@ -389,6 +389,7 @@ sub validate($$) {
                     $field_input = $new_value;
                 }
                 else {
+                    $field_input = undef;
                     push @{ $errors{ $field } }, $error;
                     last DECL_FOR_FIELD;
                 }
