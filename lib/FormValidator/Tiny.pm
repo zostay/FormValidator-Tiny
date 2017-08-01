@@ -24,6 +24,7 @@ BEGIN {
     );
     our @EXPORT_OK = (@export_predicates, @export_filters);
     our %EXPORT_TAGS = (
+        validation => \@EXPORT,
         predicates => \@export_predicates,
         filters    => \@export_filters,
     );
@@ -36,12 +37,8 @@ my %coercer = (
     '?'     => sub { (1, '', length($_[0]) > 0) },
     '?+'    => sub { (1, '', !!(0+$_[0])) },
     '?perl' => sub { (1, '', !!$_[0]) },
-    '[]'    => sub { (1, '', ref $_[0] eq 'ARRAY' ? $_[0]
-                           : ref $_[0] eq 'HASH'  ? [ %{ $_[0] } ]
-                           :                        [ $_[0] ]) },
-    '{}'    => sub { (1, '', ref $_[0] eq 'ARRAY' ? +{ @{ $_[0] } }
-                           : ref $_[0] eq 'HASH'  ? $_[0]
-                           :                        +{ $_[0] => $_[0] }) },
+    '[]'    => sub { (1, '', [ _listy($_[0]) ]) },
+    '{}'    => sub { (1, '', +{ _listy($_[0]) }) },
 );
 
 sub _sub_coercer {
@@ -560,7 +557,13 @@ sub number_in_range {
 
 sub split_by {
     my ($by, $count) = @_;
-    sub { [ split $_[0], $by, $count ] }
+
+    if ($count) {
+        sub { p $_[0]; [ split $_[0], $by, $count ] }
+    }
+    else {
+        sub { p $_[0]; [ split $_[0], $by ] }
+    }
 }
 
 sub trim {
@@ -577,7 +580,7 @@ __END__
 
 =head1 SYNOPSIS
 
-    use FormValidator::Tiny;
+    use FormValidator::Tiny qw( :validation :predicates :filtesr );
     use Email::Valid;   # <-- for demonstration, not required
     use Email::Address; # <-- for demonstration, not required
     use Types::Standard qw( Int ); # <-- for demonstration, not required

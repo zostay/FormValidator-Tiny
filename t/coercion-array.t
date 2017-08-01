@@ -1,0 +1,37 @@
+#!/usr/bin/perl
+
+use Test2::V0;
+
+use FormValidator::Tiny qw( :validation :filters );
+
+validation_spec 'edit' => [
+    name => [
+        into => '[]',
+    ],
+    name2 => [
+        multiple => 1,
+        into     => '[]',
+    ],
+    name3 => [
+        into      => '[]',
+    ],
+];
+
+{
+    my ($p, $e) = validate edit => [
+        name  => 'foo',
+        name2 => 'foo',
+        name2 => 'bar',
+        name3 => { 'foo' => 'bar', 'baz' => 'qux' },
+    ];
+
+    is $e, undef, 'no errors';
+    is $p->{name}, [ 'foo' ], 'name is [foo]';
+    is $p->{name2}, [ 'foo', 'bar' ], 'name is [foo,bar]';
+    is $p->{name3}, in_set(
+        [ 'foo', 'bar', 'baz', 'qux' ],
+        [ 'baz', 'qux', 'foo', 'bar' ],
+    ), 'name is [foo,bar,baz,qux] in whatever order';
+}
+
+done_testing;

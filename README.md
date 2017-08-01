@@ -10,7 +10,7 @@ version 0.001
 
 # SYNOPSIS
 
-    use FormValidator::Tiny;
+    use FormValidator::Tiny qw( :validation :predicates :filtesr );
     use Email::Valid;   # <-- for demonstration, not required
     use Email::Address; # <-- for demonstration, not required
     use Types::Standard qw( Int ); # <-- for demonstration, not required
