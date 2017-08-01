@@ -66,12 +66,12 @@ sub _yes_no_coercer {
 
 sub _package_coercer {
     my ($package) = @_;
-    sub { return $package->new($_[0]) }
+    sub { (1, '', $package->new($_[0])) }
 }
 
 sub _type_coercer {
     my ($type) = @_;
-    sub { return $type->coerce($_[0]) }
+    sub { (1, '', $type->coerce($_[0])) }
 }
 
 sub _sub_validator {
