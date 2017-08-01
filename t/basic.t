@@ -7,7 +7,7 @@ use Test2::V0;
 use ok('FormValidator::Tiny');
 import FormValidator::Tiny(':predicates', ':filters');
 
-validation_spec 'edit' => [
+my $edit = validation_spec 'edit' => [
     name => [
         required => 1,
         must     => limit_character_set('_', 'a-z', 'A-Z', '0-9'),
@@ -35,6 +35,27 @@ validation_spec 'edit' => [
 
 {
     my ($p, $e) = validate edit => {
+        age => '14',
+    };
+
+    is $e->{name}[0], 'This information is required.', 'got an error';
+    is $p->{name}, undef, 'no steve';
+    is $p->{age}, 14, 'got 14';
+}
+
+{
+    my ($p, $e) = validate $edit => {
+        name => 'Steve',
+        age  => '14',
+    };
+
+    is $e, undef, 'no errors';
+    is $p->{name}, 'Steve', 'got steve';
+    is $p->{age}, 14, 'got 14';
+}
+
+{
+    my ($p, $e) = validate $edit => {
         age => '14',
     };
 
