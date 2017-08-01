@@ -1,8 +1,9 @@
+[![Build Status](https://travis-ci.org/zostay/FormValidator-Tiny.svg?branch=master)](https://travis-ci.org/zostay/FormValidator-Tiny)
+[![Coverage Status](https://coveralls.io/repos/zostay/FormValidator-Tiny/badge.svg?branch=master)](https://coveralls.io/r/zostay/FormValidator-Tiny?branch=master)
+
 # NAME
 
 FormValidator::Tiny - A tiny form validator
-
-[![Build Status](https://travis-ci.org/zostay/FormValidator-Tiny.png?branch=master)](https://travis-ci.org/zostay/FormValidator-Tiny)
 
 # VERSION
 
