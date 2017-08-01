@@ -67,4 +67,17 @@ validation_spec 'edit' => [
     is $p->{name3}, undef, 'name2 is undef';
 }
 
+package Types::Broken {
+    sub new { bless {}, $_[0] }
+}
+sub TypeBroken() { Types::Broken->new }
+
+ok dies {
+    validation_spec 'edit2' => [
+        name => [
+            must => TypeBroken,
+        ],
+    ];
+}, 'should die with an invalid type';
+
 done_testing;
