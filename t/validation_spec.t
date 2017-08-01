@@ -19,6 +19,15 @@ isa_ok $MyApp::Test::FORM_VALIDATOR_TINY_SPECIFICATION->{edit},
 is $MyApp::Test::FORM_VALIDATOR_TINY_SPECIFICATION->{edit},
    $MyApp::Test::lexical, 'lexical is the same as internal global';
 
+validation_spec 'MyApp::Test::another_edit' => [];
+
+is $MyApp::Test::FORM_VALIDATOR_TINY_SPECIFICATION, {
+    edit => [],
+    another_edit => [],
+}, 'validation_spec sets the expected variable';
+isa_ok $MyApp::Test::FORM_VALIDATOR_TINY_SPECIFICATION->{another_edit},
+    'FormValidator::Tiny';
+
 like dies {
         validation_spec [];
     }, qr/useless call to validation_spec/,
