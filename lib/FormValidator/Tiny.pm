@@ -116,7 +116,7 @@ sub _type_validator {
         }
     }
 
-    return;
+    die "bad type encountered"; # uncoverable statement
 }
 
 sub _with_error {
@@ -440,7 +440,7 @@ sub limit_character_set {
             elsif (/^\[([^\]]+)\]$/) {
                 my $name = my $prop = $1;
                 $name =~ s/_/ /g;
-                [ "\\p{$prop}", qq["$name"] ]
+                [ "\\p{$prop}", qq[\L$name\E characters] ]
             }
             else {
                 die "invalid character set [$_]";
@@ -450,8 +450,7 @@ sub limit_character_set {
         my $classes = join ' + ', map { $_->[0] } @class_parts;
         my $re = qr/(?[ $classes ])/x;
 
-        my $error = "This value may only contain characters matching the following character sets: "
-                  . _comma_and(map { $_->[1] } @class_parts);
+        my $error = _comma_and(map { $_->[1] } @class_parts);
 
         return ($re, $error);
     };
@@ -466,7 +465,8 @@ sub limit_character_set {
 
         sub {
             my ($value) = @_;
-            ($value =~ /^(?:$first_re$rest_re*)?$/, $error);
+            my $valid = (!defined($value) || $value =~ /^(?:$first_re$rest_re*)?$/);
+            ($valid, $error);
         };
     }
     else {
@@ -477,7 +477,8 @@ sub limit_character_set {
 
         sub {
             my ($value) = @_;
-            (!defined($value) || $value =~ /^$re*$/, $error);
+            my $valid = (!defined($value) || $value =~ /^$re*$/);
+            ($valid, $error);
         };
     }
 }
