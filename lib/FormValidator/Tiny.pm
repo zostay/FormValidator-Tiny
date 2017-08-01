@@ -185,7 +185,8 @@ my $NAME_RE = qr/ (?[ ( \p{Word} & \p{XID_Start} ) + [_] ])
 my $PACKAGE_RE = qr/^ $NAME_RE (?: ('|::) $NAME_RE )* $/x;
 
 sub _locate_package_name {
-    my ($spec_name) = @_;
+    my ($spec_name, $depth) = @_;
+    $depth //= 1;
 
     die "name must be a valid Perl identifier"
         unless $spec_name =~ /$PACKAGE_RE/;
@@ -197,8 +198,9 @@ sub _locate_package_name {
         $package = join '::', @parts;
     }
     else {
-        $package = caller() // 'main';
-        $name    = $spec_name;
+        ($package) = caller($depth);
+        $package //='main';
+        $name      = $spec_name;
     }
 
     $package .= '::FORM_VALIDATOR_TINY_SPECIFICATION';
@@ -222,6 +224,9 @@ sub validation_spec($;$) {
         $error = sub { die "spec [$name] ", @_ };
     }
     else {
+        if (!defined wantarray) {
+            die "useless call to validation_spec with no name in void context";
+        }
         $error = sub { die "spec ", @_ };
     }
 
@@ -247,7 +252,7 @@ sub validation_spec($;$) {
             my ($op, $arg) = @$decl_pair;
 
             if (any { $op eq $_ } qw( from multiple trim )) {
-                $error->("found after filter or validation declarations")
+                $error->("found [$op] after filter or validation declarations")
                     if @decl > 1;
 
                 $error->("has more than one [$op] declaration")
