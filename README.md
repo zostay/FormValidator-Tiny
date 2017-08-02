@@ -93,6 +93,8 @@ version 0.001
 
 # DESCRIPTION
 
+The API of this module is still under development and could change, but probably won't.
+
 There are lots for form validators, but this one aims to be the one that just
 one thing and does it well without involving anything else if it can. If you
 just need a small form validator without installing all of CPAN, this will do
@@ -533,6 +535,11 @@ established the first time `validation_spec` is called. The spec names are the
 keys and the values have no documented definition. If you want to see what they
 are, you must the read the code, but there's no guarantee that the internal
 representation of this variable will stay the same in future releases.
+
+# SEE ALSO
+
+[Validate::Tiny](https://metacpan.org/pod/Validate::Tiny) is very similar to this module in purpose and goals, but with
+a different API.
 
 # AUTHOR
 

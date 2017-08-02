@@ -720,7 +720,45 @@ syntax, I hope this will do that too.
 
 This module requires Perl 5.18 or better as of this writing.
 
-=head1 EXPORTED FUNCTIONS
+=head1 EXPORTS
+
+This module exports three sets of functions, each with their own export tag:
+
+=over
+
+=item :validation
+
+This is exported by default. It includes the two central functions provided by this interface, C<validation_spec> and C<validate>.
+
+=item :predicates
+
+This includes the built-in predicate helpers, used with C<must> and C<must>-like directives.
+
+=over
+
+=item limit_character_set
+
+=item length_in_range
+
+=item equal_to
+
+=item number_in_range
+
+=back
+
+=item :filters
+
+This includes the build-in filter helpers, used with C<into> and C<into>-like directives.
+
+=over
+
+=item split_by
+
+=item trim
+
+=back
+
+=head1 FUNCTIONS
 
 =head2 validation_spec
 
