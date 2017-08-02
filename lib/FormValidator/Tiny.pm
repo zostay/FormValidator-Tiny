@@ -4,7 +4,7 @@ use v5.18;
 use warnings;
 
 use List::Util qw( any pairs pairgrep pairmap );
-use Scalar::Util qw( blessed );
+use Scalar::Util qw( blessed looks_like_number );
 use experimental qw( regex_sets );
 
 use Exporter;
@@ -549,10 +549,19 @@ sub number_in_range {
         $stop  = shift;
     }
 
-    my $check_start = $starti ? sub { ($_[0] >= $start, "The number must be at least $start.") }
-                    :           sub { ($_[0] > $start,  "The number must be greater than $start.") };
-    my $check_stop  = $stopi  ? sub { ($_[0] <= $stop,  "The number must be no more than $stop.") }
-                    :           sub { ($_[0] < $stop,   "The number must be less than $stop.") };
+    die "minimum length in length_in_range must be a positive integer, got [$start] instead"
+        unless $start eq '*' || looks_like_number($start);
+
+    die "maximum length in length_in_range must be a positive integer, got [$stop] instead"
+        unless $stop eq '*' || looks_like_number($stop);
+
+    die "minimum length must be less than or equal to maximum length in length_in_range, got [$start>$stop] instead"
+        if $start ne '*' && $stop ne '*' && $start > $stop;
+
+    my $check_start = $starti ? sub { ((!defined $_[0] || $_[0] >= $start), "The number must be at least $start.") }
+                    :           sub { ((!defined $_[0] || $_[0] > $start),  "The number must be greater than $start.") };
+    my $check_stop  = $stopi  ? sub { ((!defined $_[0] || $_[0] <= $stop),  "The number must be no more than $stop.") }
+                    :           sub { ((!defined $_[0] || $_[0] < $stop),   "The number must be less than $stop.") };
 
     if ($start eq '*' && $stop eq '*') {
         return sub { (1, '') };
@@ -1041,14 +1050,14 @@ declaration.
 
 The subroutine will be passed a two values. The first is the input to test
 (which will also be set in the localalized copy of C<$_>). This second value
-passed is rest of the input as processing currently stands. The output may come
-as a single or two values. The first value returned is always a boolean
-indicating whether the validation has passed. The second value is the error
-message to use.  If only a single value is returned, you may still set the error
-message with a following L</with_error> declaration.
+passed is rest of the input as processing currently stands. The output must be a
+two element list.  The first value returned is a boolean indicating whether the
+validation has passed. The second value is the error message to use. It is
+acceptable to return an error message even if the first value indicates that the
+validation test passes. In that case, the error message will be ignored.
 
-Without a C<with_error> declaration or a second value, the error message will
-not be very helpful.
+In any case, you may override the error message returned using a following
+L</with_error> declaration.
 
 =item Type::Tiny Object
 

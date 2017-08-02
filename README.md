@@ -451,14 +451,14 @@ The module supports three kinds of predicates:
 
     The subroutine will be passed a two values. The first is the input to test
     (which will also be set in the localalized copy of `$_`). This second value
-    passed is rest of the input as processing currently stands. The output may come
-    as a single or two values. The first value returned is always a boolean
-    indicating whether the validation has passed. The second value is the error
-    message to use.  If only a single value is returned, you may still set the error
-    message with a following ["with\_error"](#with_error) declaration.
+    passed is rest of the input as processing currently stands. The output must be a
+    two element list.  The first value returned is a boolean indicating whether the
+    validation has passed. The second value is the error message to use. It is
+    acceptable to return an error message even if the first value indicates that the
+    validation test passes. In that case, the error message will be ignored.
 
-    Without a `with_error` declaration or a second value, the error message will
-    not be very helpful.
+    In any case, you may override the error message returned using a following
+    ["with\_error"](#with_error) declaration.
 
 - Type::Tiny Object
 
