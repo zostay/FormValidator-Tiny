@@ -584,11 +584,17 @@ sub number_in_range {
 sub split_by {
     my ($by, $count) = @_;
 
+    die "missing string or regex to split by"
+        unless defined $by;
+
+    die "count must be greater than 1 if present"
+        if defined $count && $count <= 1;
+
     if ($count) {
-        sub { p $_[0]; [ split $_[0], $by, $count ] }
+        sub { [ split $by, $_[0], $count ] }
     }
     else {
-        sub { p $_[0]; [ split $_[0], $by ] }
+        sub { [ split $by, $_[0] ] }
     }
 }
 
