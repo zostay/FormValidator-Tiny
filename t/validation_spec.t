@@ -54,6 +54,20 @@ like dies {
     }, qr/must be in an array/,
     'dies when field decl is hash';
 
+like dies {
+        $t = validation_spec [
+            'name',
+        ],
+    }, qr/odd number of elements/,
+    'dies when odd number of elements in spec';
+
+like dies {
+        $t = validation_spec [
+            'name' => [ 'must' ],
+        ],
+    }, qr/odd number of elements/,
+    'dies when odd number of elements in decl';
+
 subtest "$_ exceptions" => sub {
     like dies {
             $t = validation_spec [

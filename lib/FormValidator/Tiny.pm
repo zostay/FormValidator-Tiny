@@ -233,6 +233,9 @@ sub validation_spec($;$) {
     $error->("must be an array reference")
         unless 'ARRAY' eq ref $spec;
 
+    $error->("contains odd number of elements")
+        unless scalar @$spec % 2 == 0;
+
     my @decl_spec;
     my %encountered_fields;
     for my $field_pair (pairs @$spec) {
@@ -245,6 +248,9 @@ sub validation_spec($;$) {
 
         $error->("must be in an array reference")
             unless 'ARRAY' eq ref $decls;
+
+        $error->("contains odd number of elements")
+            unless scalar @$decls % 2 == 0;
 
         my %options;
         my @decl = (\%options);
