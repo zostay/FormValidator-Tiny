@@ -19,7 +19,7 @@ validation_spec 'edit' => [
 ];
 
 {
-    my ($p, $e) = validate edit => [
+    my ($p, $e) = validate_form edit => [
         name  => 'yes',
         name2 => 'no',
         name3 => 'wth',

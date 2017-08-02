@@ -23,7 +23,7 @@ my $edit = validation_spec 'edit' => [
 ];
 
 {
-    my ($p, $e) = validate edit => {
+    my ($p, $e) = validate_form edit => {
         name => 'Steve',
         age  => '14',
     };
@@ -34,7 +34,7 @@ my $edit = validation_spec 'edit' => [
 }
 
 {
-    my ($p, $e) = validate edit => {
+    my ($p, $e) = validate_form edit => {
         age => '14',
     };
 
@@ -44,7 +44,7 @@ my $edit = validation_spec 'edit' => [
 }
 
 {
-    my ($p, $e) = validate $edit => {
+    my ($p, $e) = validate_form $edit => {
         name => 'Steve',
         age  => '14',
     };
@@ -55,7 +55,7 @@ my $edit = validation_spec 'edit' => [
 }
 
 {
-    my ($p, $e) = validate $edit => {
+    my ($p, $e) = validate_form $edit => {
         age => '14',
     };
 

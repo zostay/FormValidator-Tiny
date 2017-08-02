@@ -11,7 +11,7 @@ use Exporter;
 
 BEGIN {
     our @ISA = qw( Exporter );
-    our @EXPORT = qw( validation_spec validate );
+    our @EXPORT = qw( validation_spec validate_form );
     my @export_predicates = qw(
         limit_character_set
         length_in_range
@@ -349,7 +349,7 @@ sub validation_spec($;$) {
     return $finished_spec;
 }
 
-sub validate($$) {
+sub validate_form($$) {
     my ($name, $input) = @_;
     my @input = _listy($input);
 
@@ -694,7 +694,7 @@ __END__
     # Somehow your web framework gets you a set of form parameters submitted by
     # POST or whatever. GO!
     my $params = web_framework_params_method();
-    my ($parsed_params, $errors) = validate edit_user => $params;
+    my ($parsed_params, $errors) = validate_form edit_user => $params;
 
     # You probably want better error handling
     if ($errors) {
@@ -728,7 +728,7 @@ This module exports three sets of functions, each with their own export tag:
 
 =item :validation
 
-This is exported by default. It includes the two central functions provided by this interface, C<validation_spec> and C<validate>.
+This is exported by default. It includes the two central functions provided by this interface, C<validation_spec> and C<validate_form>.
 
 =item :predicates
 
@@ -758,6 +758,8 @@ This includes the build-in filter helpers, used with C<into> and C<into>-like di
 
 =back
 
+=back
+
 =head1 FUNCTIONS
 
 =head2 validation_spec
@@ -765,7 +767,7 @@ This includes the build-in filter helpers, used with C<into> and C<into>-like di
     validation_spec $spec_name => \@spec;
 
 This defines a validation specification. It associates a specification named
-C<$spec_name> with the current package. Any use of C<validate> within the
+C<$spec_name> with the current package. Any use of C<validate_form> within the
 current package will use specifications named within the current package. The
 following example would work fine as the "edit" spec defined in each controller
 is in their respective package namespaces.
@@ -774,7 +776,7 @@ is in their respective package namespaces.
     validation_spec edit => [ ... ];
     sub process_edits {
         my ($self, $c) = @_;
-        my ($p, $e) = validate edit => $c->req->body_parameters;
+        my ($p, $e) = validate_form edit => $c->req->body_parameters;
         ...
     }
 
@@ -782,13 +784,13 @@ is in their respective package namespaces.
     validation_spec edit => [ ... ];
     sub process_edits {
         my ($self, $c) = @_;
-        my ($p, $e) = validate edit => $c->req->body_parameters;
+        my ($p, $e) = validate_form edit => $c->req->body_parameters;
         ...
     }
 
 If you want to define them into a different package, name the package as part of
-the spec. Similarly, you can validate using a spec defined in a different
-package by naming the package when calling L</validate>:
+the spec. Similarly, you can validate_form using a spec defined in a different
+package by naming the package when calling L</validate_form>:
 
     package MyApp::Forms;
     validation_spec MyApp::Controller::User::edit => [ ... ];
@@ -796,21 +798,21 @@ package by naming the package when calling L</validate>:
     package MyApp::Controller::User;
     sub process_groups {
         my ($self, $c) = @_;
-        my ($p, $e) = validate MyApp::Controller::UserGroup::edit => $c->req->body_parameters;
+        my ($p, $e) = validate_form MyApp::Controller::UserGroup::edit => $c->req->body_parameters;
         ...
     }
 
 You can also define your validation specification as lexical variables instead:
 
     my $spec = validation_spec [ ... ];
-    my ($p, $e) = validate $spec, $c->req->body_parameters;
+    my ($p, $e) = validate_form $spec, $c->req->body_parameters;
 
 For information about how to craft a spec, see the L</VALIDATION SPECIFICATIONS>
 section.
 
-=head2 validate
+=head2 validate_form
 
-    my ($params, $errors) = validate $spec, $input_parameters;
+    my ($params, $errors) = validate_form $spec, $input_parameters;
 
 Compares the given parameters agains the named spec. The C<$input_parameters>
 may be provided as either a hash or an array of alternating key-value pairs. All
@@ -925,7 +927,7 @@ items, even if there are 0 or 1.
 
     trim => 0
 
-The default behavior of L</validate> is to trim whitespace from the beginning
+The default behavior of L</validate_form> is to trim whitespace from the beginning
 and end of a value before processing. You can use the C<trim> declaration to
 disable that.
 
@@ -1125,14 +1127,14 @@ L</with_error> declaration.
 
 =item Type::Tiny Object
 
-The third option is to use a L<Type::Tiny>-style type object. The L</validate>
-routine merely checks to see if it is an object that provides a C<check> method
-or a C<validate> method. If it provides a C<check> method, that method will be
-called and the boolean value returned will be treated as the success or failure
-to validate. In this case, the error message will be pulled from a call to
-C<get_message>, if such a method is provided. In the C<validate> case, it will
-be called and a true value will be treated as the error message and a false
-value as validation success.
+The third option is to use a L<Type::Tiny>-style type object. The
+L</validate_form> routine merely checks to see if it is an object that provides
+a C<check> method or a C<validate_form> method. If it provides a C<check>
+method, that method will be called and the boolean value returned will be
+treated as the success or failure to validate. In this case, the error message
+will be pulled from a call to C<get_message>, if such a method is provided. In
+the C<validate_form> case, it will be called and a true value will be treated as
+the error message and a false value as validation success.
 
 It is my experience that the error messages provided by L<Type::Tiny> and
 similar type systems are not friendly for use with end-uers. As such, it is

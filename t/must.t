@@ -42,7 +42,7 @@ validation_spec 'edit' => [
 ];
 
 {
-    my ($p, $e) = validate edit => [
+    my ($p, $e) = validate_form edit => [
         name => 'red',
         name2 => 'red',
         name2 => 'red',
@@ -69,7 +69,7 @@ validation_spec 'edit' => [
 }
 
 {
-    my ($p, $e) = validate edit => [
+    my ($p, $e) = validate_form edit => [
         name => 'blue',
         name2 => 'red',
         name2 => 'blue',
@@ -102,7 +102,7 @@ validation_spec 'edit' => [
 }
 
 {
-    my ($p, $e) = validate edit => [
+    my ($p, $e) = validate_form edit => [
     ];
 
     is $e, undef, 'no errors';
@@ -116,7 +116,7 @@ validation_spec 'edit' => [
 }
 
 {
-    my ($p, $e) = validate edit => [
+    my ($p, $e) = validate_form edit => [
         name => 'red',
         name2 => 'blue',
         name2 => 'red',
@@ -148,7 +148,7 @@ validation_spec 'edit' => [
 }
 
 {
-    my ($p, $e) = validate edit => [
+    my ($p, $e) = validate_form edit => [
         name => 'blue',
         name2 => 'blue',
         name2 => 'blue',

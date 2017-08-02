@@ -19,7 +19,7 @@ validation_spec 'edit' => [
 ];
 
 {
-    my ($p, $e) = validate edit => {
+    my ($p, $e) = validate_form edit => {
         name  => '0',
         name2 => '0',
         name3 => '0',
@@ -32,7 +32,7 @@ validation_spec 'edit' => [
 }
 
 {
-    my ($p, $e) = validate edit => {
+    my ($p, $e) = validate_form edit => {
         name  => '1',
         name2 => '1',
         name3 => '1',
@@ -45,7 +45,7 @@ validation_spec 'edit' => [
 }
 
 {
-    my ($p, $e) = validate edit => {
+    my ($p, $e) = validate_form edit => {
         name  => '',
         name2 => '',
         name3 => '',
@@ -58,7 +58,7 @@ validation_spec 'edit' => [
 }
 
 {
-    my ($p, $e) = validate edit => {
+    my ($p, $e) = validate_form edit => {
         name  => '0E0',
         name2 => '0E0',
         name3 => '0E0',

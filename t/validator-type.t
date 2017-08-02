@@ -38,7 +38,7 @@ validation_spec 'edit' => [
 ];
 
 {
-    my ($p, $e) = validate edit => [
+    my ($p, $e) = validate_form edit => [
         name => 'red',
         name2 => 'red',
         name3 => 'red',
@@ -51,7 +51,7 @@ validation_spec 'edit' => [
 }
 
 {
-    my ($p, $e) = validate edit => [
+    my ($p, $e) = validate_form edit => [
         name => 'blue',
         name2 => 'blue',
         name3 => 'blue',
