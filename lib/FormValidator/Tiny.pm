@@ -486,33 +486,39 @@ sub limit_character_set {
 sub length_in_range {
     my ($start, $stop) = @_;
 
-    die "minimum length in length_in_range must be an integer, got [$start] instead"
-        unless $start =~ /^[0-9]+|\*$/;
+    die "minimum length in length_in_range must be a positive integer, got [$start] instead"
+        unless $start =~ /^(?:[0-9]+|\*)$/;
 
-    die "maximum length in length_in_range must be an integer, got [$stop] instead"
-        unless $stop =~ /^[0-9]+|\*$/;
+    die "maximum length in length_in_range must be a positive integer, got [$stop] instead"
+        unless $stop =~ /^(?:[0-9]+|\*)$/;
+
+    die "minimum length must be less than or equal to maximum length in length_in_range, got [$start>$stop] instead"
+        if $start ne '*' && $stop ne '*' && $start > $stop;
 
     if ($start eq '*' && $stop eq '*') {
         return sub { (1, '') };
     }
     elsif ($start eq '*') {
         return sub {
-            (length $_[0] <= $stop, "The value must be no longer than $stop characters.")
+            my $valid = !defined $_[0] || length $_[0] <= $stop;
+            ($valid, "The value must be no longer than $stop characters.")
         };
     }
     elsif ($stop eq '*') {
         return sub {
-            (length $_[0] >= $start, "The value must be at least $start characters in length.")
+            my $valid = !defined $_[0] || length $_[0] >= $start;
+            ($valid, "The value must be at least $start characters in length.")
         }
     }
     else {
         return sub {
             return (1, '') unless defined $_[0];
             if (length $_[0] >= $start) {
-                (length $_[0] <= $stop, "The value must be no longer than $stop characters.");
+                my $valid = length $_[0] <= $stop;
+                return ($valid, "The value must be no longer than $stop characters.");
             }
             else {
-                (0, "The value must be at least $start characters in length.")
+                return ('', "The value must be at least $start characters in length.")
             }
         }
     }
