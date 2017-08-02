@@ -600,10 +600,28 @@ sub split_by {
 
 sub trim {
     my $only = shift // 'both';
-    return sub { s/^\s+//; s/\s+$//r } if $only eq 'both';
-    return sub { s/^\s+//r }           if $only eq 'left';
-    return sub { s/\s+$//r }           if $only eq 'right';
-    die qq[unknown trim option [$only], expected "both" or "left" or "right"];
+    if ($only eq 'both') {
+        return sub {
+            return unless defined $_;
+            s/\A\s+//;
+            s/\s+\Z//r;
+        };
+    }
+    elsif ($only eq 'left') {
+        return sub {
+            return unless defined $_;
+            s/\A\s+//r;
+        }
+    }
+    elsif ($only eq 'right') {
+        return sub {
+            return unless defined $_;
+            s/\s+\Z//r;
+        }
+    }
+    else {
+        die qq[unknown trim option [$only], expected "both" or "left" or "right"];
+    }
 }
 
 1;
