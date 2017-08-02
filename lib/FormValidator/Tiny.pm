@@ -357,7 +357,13 @@ sub validation_spec($;$) {
 
 sub validate_form($$) {
     my ($name, $input) = @_;
-    my @input = _listy($input);
+    my @input;
+    if (blessed $input && $input->can('flatten')) {
+        @input = $input->flatten;
+    }
+    else {
+        @input = _listy($input);
+    }
 
     my $spec = $name;
     unless (blessed $spec && $spec->isa(__PACKAGE__)) {
