@@ -603,10 +603,10 @@ sub split_by {
         if defined $count && $count <= 1;
 
     if ($count) {
-        sub { [ split $by, $_[0], $count ] }
+        sub { defined $_[0] ? [ split $by, $_[0], $count ] : [] }
     }
     else {
-        sub { [ split $by, $_[0] ] }
+        sub { defined $_[0] ? [ split $by, $_[0] ] : [] }
     }
 }
 
