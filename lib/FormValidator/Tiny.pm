@@ -741,7 +741,7 @@ __END__
 The API of this module is still under development and could change, but probably won't.
 
 There are lots for form validators, but this one aims to be the one that just
-one thing and does it well without involving anything else if it can. If you
+does one thing and does it well without involving anything else if it can. If you
 just need a small form validator without installing all of CPAN, this will do
 that. If you want to install all of CPAN and use a readable form validation spec
 syntax, I hope this will do that too.
@@ -842,7 +842,7 @@ section.
 
     my ($params, $errors) = validate_form $spec, $input_parameters;
 
-Compares the given parameters agains the named spec. The C<$input_parameters>
+Compares the given parameters against the named spec. The C<$input_parameters>
 may be provided as either a hash or an array of alternating key-value pairs. All
 keys and values must be provided as strings.
 
@@ -945,7 +945,7 @@ changes the key used for input.
 
     multiple => 1
 
-The multiple input declaration tells the validator weather to interpret the
+The multiple input declaration tells the validator whether to interpret the
 input parameter as a multiple input or not. Without this declaration or with it
 set to 0, the validator will interpret multiple inputs as a single value,
 ignoring all but the last. With this declaration, it treat the input as multiple
@@ -1150,11 +1150,11 @@ declaration.
 
     ($valid, $message) = $code->($value, \%fields);
 
-The subroutine will be passed a two values. The first is the input to test
+The subroutine will be passed two values. The first is the input to test
 (which will also be set in the localalized copy of C<$_>). This second value
 passed is rest of the input as processing currently stands.
 
-The return value must be a two element list.
+The return value must be a two elements list.
 
 =over
 
