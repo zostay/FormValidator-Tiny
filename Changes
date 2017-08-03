@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.002     2017-08-03 10:56:32-05:00 America/Chicago
+
     * Major: Correcting the the way required/optional work.
     * Minor: Adding a way for subroutine validators to shortcircuit validation,
       which just so happens to be the thing setting optional needed to do.
