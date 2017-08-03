@@ -9,7 +9,7 @@ FormValidator::Tiny - A tiny form validator
 
 # VERSION
 
-version 0.001
+version 0.002
 
 # SYNOPSIS
 
@@ -441,18 +441,24 @@ array or to all values of a hash.
 
 ### required
 
-    required => 1
-
-This is a validation rule that marks the parameter as required. Any setting of
-the value with one or more characters will pass this validation. Setting the
-value to 0 will disable the requirement.
-
 ### optional
 
+    required => 1
+    required => 0
     optional => 1
+    optional => 0
 
-This is the opposite of ["required"](#required). Setting the value to 1 means no check, but
-to 0 is the same as `required` being set to 1.
+It is strongly recommended that all fields add this declaratoi immediately after
+the input declarations, if any.
+
+When required is set (or optional is set to 0), an initial validation check is
+inserted that will fail if a value is not provided for this field. That value
+must contain at least one character (after trimming, if trimming is not
+disabled).
+
+When optional is set (or required is set to 0), an initial validaiton check is
+inserted that will shortcircuit the rest of the validation if no value is
+provided.
 
 ### must
 
@@ -475,16 +481,29 @@ The module supports three kinds of predicates:
 
 - Subroutine
 
+        ($valid, $message) = $code->($value, \%fields);
+
     The subroutine will be passed a two values. The first is the input to test
     (which will also be set in the localalized copy of `$_`). This second value
-    passed is rest of the input as processing currently stands. The output must be a
-    two element list.  The first value returned is a boolean indicating whether the
-    validation has passed. The second value is the error message to use. It is
-    acceptable to return an error message even if the first value indicates that the
-    validation test passes. In that case, the error message will be ignored.
+    passed is rest of the input as processing currently stands.
 
-    In any case, you may override the error message returned using a following
-    ["with\_error"](#with_error) declaration.
+    The return value must be a two element list.
+
+    1. The first value returned is a boolean indicating whether the validation has
+    passed. A true value (like 1) means validation passes and there's no error. A
+    false value (like 0) means validation does not pass and an error has occured.
+
+        There is a third option, which is to return `undef`. This indicates that
+        validaton should stop here. This is neither a success nor a failure. The value
+        processed so far will be ignored, but no error message is returned either. Any
+        further declarations for the field will be ignored as well.
+
+        Returning `undef` allows custom code to shortcircuit validation in exactly the
+        same was as setting `optional`.
+
+    2. The second value is the error message to use. It is acceptable to return an
+    error message even if the first value is a true or undefined value.  In that
+    case, the error message will be ignored.
 
 - Type::Tiny Object
 

@@ -297,10 +297,19 @@ sub validation_spec($;$) {
             elsif ($op eq 'required' || $op eq 'optional') {
                 $arg = !$arg if $op eq 'optional';
 
+                # Validate on required
                 if ($arg) {
                     push @decl, sub {
-                        my $valid = defined $_[0] && $_[0] =~ /./;
+                        my $valid = (defined $_[0] && $_[0] =~ /./);
                         ($valid, 'Required.', $_[0])
+                    };
+                }
+
+                # Shortcircuit on optional
+                else {
+                    push @decl, sub {
+                        my $valid = (defined $_[0] && $_[0] =~ /./) ? 1 : undef;
+                        ($valid, '', $_[0])
                     };
                 }
             }
@@ -396,7 +405,7 @@ sub validate_form($$) {
                 my $trim     = $decl->{trim}     // 1;
 
                 my @values = pairmap { $b } pairgrep { $a eq $from } @input;
-                @values = map { s/^\s+//; s/\s+$//; $_ } @values if $trim;
+                @values = map { if (defined) { s/^\s+//; s/\s+$// } $_ } @values if $trim;
 
                 if ($multiple) {
                     $field_input = \@values;
@@ -409,7 +418,11 @@ sub validate_form($$) {
             else {
                 my ($valid, $error, $new_value) = $decl->($field_input, \%params);
 
-                if ($valid) {
+                if (!defined $valid) {
+                    $field_input = undef;
+                    last DECL_FOR_FIELD;
+                }
+                elsif ($valid) {
                     $field_input = $new_value;
                 }
                 else {
@@ -1093,18 +1106,24 @@ array or to all values of a hash.
 
 =head3 required
 
-    required => 1
-
-This is a validation rule that marks the parameter as required. Any setting of
-the value with one or more characters will pass this validation. Setting the
-value to 0 will disable the requirement.
-
 =head3 optional
 
+    required => 1
+    required => 0
     optional => 1
+    optional => 0
 
-This is the opposite of L</required>. Setting the value to 1 means no check, but
-to 0 is the same as C<required> being set to 1.
+It is strongly recommended that all fields add this declaratoi immediately after
+the input declarations, if any.
+
+When required is set (or optional is set to 0), an initial validation check is
+inserted that will fail if a value is not provided for this field. That value
+must contain at least one character (after trimming, if trimming is not
+disabled).
+
+When optional is set (or required is set to 0), an initial validaiton check is
+inserted that will shortcircuit the rest of the validation if no value is
+provided.
 
 =head3 must
 
@@ -1129,13 +1148,39 @@ declaration.
 
 =item Subroutine
 
+    ($valid, $message) = $code->($value, \%fields);
+
 The subroutine will be passed a two values. The first is the input to test
 (which will also be set in the localalized copy of C<$_>). This second value
-passed is rest of the input as processing currently stands. The output must be a
-two element list.  The first value returned is a boolean indicating whether the
-validation has passed. The second value is the error message to use. It is
-acceptable to return an error message even if the first value indicates that the
-validation test passes. In that case, the error message will be ignored.
+passed is rest of the input as processing currently stands.
+
+The return value must be a two element list.
+
+=over
+
+=item 1.
+
+The first value returned is a boolean indicating whether the validation has
+passed. A true value (like 1) means validation passes and there's no error. A
+false value (like 0) means validation does not pass and an error has occured.
+
+There is a third option, which is to return C<undef>. This indicates that
+validaton should stop here. This is neither a success nor a failure. The value
+processed so far will be ignored, but no error message is returned either. Any
+further declarations for the field will be ignored as well.
+
+Returning C<undef> allows custom code to shortcircuit validation in exactly the
+same was as setting C<optional>.
+
+=item 2.
+
+The second value is the error message to use. It is acceptable to return an
+error message even if the first value is a true or undefined value.  In that
+case, the error message will be ignored.
+
+=back
+
+=cut
 
 In any case, you may override the error message returned using a following
 L</with_error> declaration.
