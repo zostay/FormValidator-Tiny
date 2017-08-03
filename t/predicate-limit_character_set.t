@@ -31,7 +31,7 @@ my ($v, $e) = $limit_az->('abc');
 ok $v, "valid string is valid";
 ($v, $e) = $limit_az->('ABC');
 ok !$v, "invalid string is invalid";
-like $e, qr/may only contain/, "got the expected error";
+like $e, qr/Only permits/, "got the expected error";
 like $e, qr/: "a" through "z"$/, "got the expected error details";
 
 my $limit_az_AZ = limit_character_set('a-z', 'A-Z');
@@ -39,7 +39,7 @@ my $limit_az_AZ = limit_character_set('a-z', 'A-Z');
 ok $v, 'valid string is valid';
 ($v, $e) = $limit_az_AZ->('Abc123');
 ok !$v, 'invalid string is invalid';
-like $e, qr/may only contain/, 'got the expected error';
+like $e, qr/Only permits/, 'got the expected error';
 like $e, qr/: "a" through "z" and "A" through "Z"$/, 'got the expected error details';
 
 my $limit_az_AZ_09 = limit_character_set('a-z', 'A-Z', '0-9');
@@ -47,7 +47,7 @@ my $limit_az_AZ_09 = limit_character_set('a-z', 'A-Z', '0-9');
 ok $v, 'valid string is valid';
 ($v, $e) = $limit_az_AZ_09->('Abc123:');
 ok !$v, 'invalid string is invalid';
-like $e, qr/may only contain/, 'got the expected error';
+like $e, qr/Only permits/, 'got the expected error';
 like $e, qr/: "a" through "z", "A" through "Z", and "0" through "9"$/, 'got the expected error details';
 
 my $limit_alpha = limit_character_set('[Lowercase_Letter]');
@@ -55,7 +55,7 @@ my $limit_alpha = limit_character_set('[Lowercase_Letter]');
 ok $v, 'valid string is valid';
 ($v, $e) = $limit_alpha->('ABC');
 ok !$v, 'invalid string is invalid';
-like $e, qr/may only contain/, 'got the expected error';
+like $e, qr/Only permits/, 'got the expected error';
 like $e, qr/: lowercase letter characters$/, 'got the expected error details';
 
 my $limit_az_dash = limit_character_set('a-z', '-');
@@ -63,7 +63,7 @@ my $limit_az_dash = limit_character_set('a-z', '-');
 ok $v, "valid string is valid";
 ($v, $e) = $limit_az_dash->('ab_cd');
 ok !$v, "invalid string is invalid";
-like $e, qr/may only contain/, "got the expected error";
+like $e, qr/Only permits/, "got the expected error";
 like $e, qr/: "a" through "z" and "-"$/, "got the expected error details";
 
 my $limit_AZ_limit_az = limit_character_set(['A-Z'], ['a-z']);
@@ -71,11 +71,11 @@ my $limit_AZ_limit_az = limit_character_set(['A-Z'], ['a-z']);
 ok $v, "valid string is valid";
 ($v, $e) = $limit_AZ_limit_az->('ABC');
 ok !$v, "invalid string is invalid";
-like $e, qr/remaining characters must/, "got the expected error";
+like $e, qr/Remaining only permits/, "got the expected error";
 like $e, qr/: "a" through "z"$/, "got the expected error details";
 ($v, $e) = $limit_AZ_limit_az->('abc');
 ok !$v, "invalid string is invalid";
-like $e, qr/may only start/, "got the expected error";
+like $e, qr/First character only permits/, "got the expected error";
 like $e, qr/: "A" through "Z"/, "got the expected error details";
 
 done_testing;

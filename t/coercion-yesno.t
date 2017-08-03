@@ -25,7 +25,7 @@ validation_spec 'edit' => [
         name3 => 'wth',
     ];
 
-    is $e, { name3 => [ 'The given value is not a valid "yes" or "no" answer.' ] }, 'name3 error';
+    is $e, { name3 => [ 'Enter "yes" or "no".' ] }, 'name3 error';
     ok $p->{name}, 'name is true';
     ok !$p->{name2}, 'name2 is false';
 }

@@ -57,7 +57,7 @@ validation_spec 'edit' => [
         name3 => 'blue',
     ];
 
-    is $e->{name}, [ 'The value given is not correct.' ], 'name has errors';
+    is $e->{name}, [ 'Incorrect.' ], 'name has errors';
     is ref $e->{name2}[0], 'CODE', 'name2 error is a coderef';
     is $e->{name2}[0]->('blue'), "Expected 'red' but got 'blue' instead.",
         'name2 coderef outputs error when called';

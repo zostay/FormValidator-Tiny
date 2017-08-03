@@ -38,7 +38,7 @@ my $edit = validation_spec 'edit' => [
         age => '14',
     };
 
-    is $e->{name}[0], 'This information is required.', 'got an error';
+    is $e->{name}[0], 'Required.', 'got an error';
     is $p->{name}, undef, 'no steve';
     is $p->{age}, 14, 'got 14';
 }
@@ -59,7 +59,7 @@ my $edit = validation_spec 'edit' => [
         age => '14',
     };
 
-    is $e->{name}[0], 'This information is required.', 'got an error';
+    is $e->{name}[0], 'Required.', 'got an error';
     is $p->{name}, undef, 'no steve';
     is $p->{age}, 14, 'got 14';
 }

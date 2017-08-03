@@ -444,8 +444,8 @@ array or to all values of a hash.
     required => 1
 
 This is a validation rule that marks the parameter as required. Any setting of
-the value will pass this validation. Setting the value to 0 will disable the
-requirement.
+the value with one or more characters will pass this validation. Setting the
+value to 0 will disable the requirement.
 
 ### optional
 

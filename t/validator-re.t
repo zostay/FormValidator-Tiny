@@ -23,7 +23,7 @@ validation_spec 'edit' => [
         name2 => 'blue',
     ];
 
-    is $e, { name2 => [ 'The value given is not correct.' ] }, 'name2 has error';
+    is $e, { name2 => [ 'Incorrect.' ] }, 'name2 has error';
     is $p->{name}, 'red', 'name is red';
 }
 

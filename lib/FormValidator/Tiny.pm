@@ -60,7 +60,7 @@ sub _yes_no_coercer {
                   : $fc_ eq $fcno  ? 0
                   :                  undef;
 
-        return (defined $truth, qq[The given value is not a valid "$yes" or "$no" answer.], $truth);
+        return (defined $truth, qq[Enter "$yes" or "$no".], $truth);
     };
 }
 
@@ -90,7 +90,7 @@ sub _re_validator {
         my ($value) = @_;
         return (1, '', $value) unless defined $value;
         my $valid = $value =~ /$re/;
-        ($valid, 'The value given is not correct.', $value);
+        ($valid, 'Incorrect.', $value);
     };
 }
 
@@ -98,7 +98,7 @@ sub _type_validator {
     my ($type) = @_;
     if ($type->can('check')) {
         my $message = $type->can('get_message') ? sub { $type->get_message($_[0]) }
-                    :                             'The value given is not correct.';
+                    :                             'Incorrect.';
 
         return sub {
             my ($value) = @_;
@@ -298,7 +298,10 @@ sub validation_spec($;$) {
                 $arg = !$arg if $op eq 'optional';
 
                 if ($arg) {
-                    push @decl, sub { (defined $_[0], 'This information is required.', $_[0]) };
+                    push @decl, sub {
+                        my $valid = defined $_[0] && $_[0] =~ /./;
+                        ($valid, 'Required.', $_[0])
+                    };
                 }
             }
 
@@ -471,25 +474,25 @@ sub limit_character_set {
         my ($first_re, $first_error) = $_build_class->(@{ $_[0] });
         my ($rest_re, $rest_error)   = $_build_class->(@{ $_[1] });
 
-        my $error = "This value may only start with characters matching the following character sets: "
-                  . $first_error . ". The remaining characters must match these character sets: "
+        my $error = "First character only permits: "
+                  . $first_error . ". Remaining only permits: "
                   . $rest_error;
 
         sub {
             my ($value) = @_;
-            my $valid = (!defined($value) || $value =~ /^(?:$first_re$rest_re*)?$/);
+            my $valid = ($value =~ /^(?:$first_re$rest_re*)?$/);
             ($valid, $error);
         };
     }
     else {
         my ($re, $error) = $_build_class->(@_);
 
-        $error = "This value may only contain characters matching the following character sets: "
+        $error = "Only permits: "
                . $error;
 
         sub {
             my ($value) = @_;
-            my $valid = (!defined($value) || $value =~ /^$re*$/);
+            my $valid = ($value =~ /^$re*$/);
             ($valid, $error);
         };
     }
@@ -512,14 +515,14 @@ sub length_in_range {
     }
     elsif ($start eq '*') {
         return sub {
-            my $valid = !defined $_[0] || length $_[0] <= $stop;
-            ($valid, "The value must be no longer than $stop characters.")
+            my $valid = length $_[0] <= $stop;
+            ($valid, "Must be no longer than $stop characters.")
         };
     }
     elsif ($stop eq '*') {
         return sub {
-            my $valid = !defined $_[0] || length $_[0] >= $start;
-            ($valid, "The value must be at least $start characters in length.")
+            my $valid = length $_[0] >= $start;
+            ($valid, "Must be at least $start characters long.")
         }
     }
     else {
@@ -527,10 +530,10 @@ sub length_in_range {
             return (1, '') unless defined $_[0];
             if (length $_[0] >= $start) {
                 my $valid = length $_[0] <= $stop;
-                return ($valid, "The value must be no longer than $stop characters.");
+                return ($valid, "Must be no longer than $stop characters.");
             }
             else {
-                return ('', "The value must be at least $start characters in length.")
+                return ('', "Must be at least $start characters in length.")
             }
         }
     }
@@ -570,10 +573,10 @@ sub number_in_range {
     die "minimum length must be less than or equal to maximum length in length_in_range, got [$start>$stop] instead"
         if $start ne '*' && $stop ne '*' && $start > $stop;
 
-    my $check_start = $starti ? sub { ((!defined $_[0] || $_[0] >= $start), "The number must be at least $start.") }
-                    :           sub { ((!defined $_[0] || $_[0] > $start),  "The number must be greater than $start.") };
-    my $check_stop  = $stopi  ? sub { ((!defined $_[0] || $_[0] <= $stop),  "The number must be no more than $stop.") }
-                    :           sub { ((!defined $_[0] || $_[0] < $stop),   "The number must be less than $stop.") };
+    my $check_start = $starti ? sub { (($_[0] >= $start), "Number must be at least $start.") }
+                    :           sub { (($_[0] > $start),  "Number must be greater than $start.") };
+    my $check_stop  = $stopi  ? sub { (($_[0] <= $stop),  "Number must be no more than $stop.") }
+                    :           sub { (($_[0] < $stop),   "Number must be less than $stop.") };
 
     if ($start eq '*' && $stop eq '*') {
         return sub { (1, '') };
@@ -1093,8 +1096,8 @@ array or to all values of a hash.
     required => 1
 
 This is a validation rule that marks the parameter as required. Any setting of
-the value will pass this validation. Setting the value to 0 will disable the
-requirement.
+the value with one or more characters will pass this validation. Setting the
+value to 0 will disable the requirement.
 
 =head3 optional
 
