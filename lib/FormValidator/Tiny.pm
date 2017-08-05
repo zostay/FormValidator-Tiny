@@ -17,6 +17,7 @@ BEGIN {
         length_in_range
         equal_to
         number_in_range
+        one_of
     );
     my @export_filters = qw(
         split_by
@@ -27,6 +28,7 @@ BEGIN {
         validation => \@EXPORT,
         predicates => \@export_predicates,
         filters    => \@export_filters,
+        all        => [ @EXPORT, @export_predicates, @export_filters ],
     );
 }
 
@@ -609,6 +611,23 @@ sub number_in_range {
     }
 }
 
+sub one_of {
+    die "at least one value must be provided to one_of"
+        unless @_ > 0;
+
+    my @enum = @_;
+    return sub {
+        my ($value) = @_;
+        for my $allowed (@enum) {
+            return (1, '') if $value eq $allowed;
+        }
+
+        return (0, 'Must be one of: '
+            . _comma_and( map { qq["$_"] } @enum )
+        );
+    };
+}
+
 sub split_by {
     my ($by, $count) = @_;
 
@@ -772,6 +791,8 @@ This includes the built-in predicate helpers, used with C<must> and C<must>-like
 
 =item number_in_range
 
+=item one_of
+
 =back
 
 =item :filters
@@ -785,6 +806,10 @@ This includes the build-in filter helpers, used with C<into> and C<into>-like di
 =item trim
 
 =back
+
+=item :all
+
+All of the above.
 
 =back
 
@@ -898,7 +923,17 @@ the value must be exactly equal to another field in the input.
     must => number_in_range(100, 500)
     must => number_in_range(exclusive => 100, exclusive => 500)
 
-Returns a predicate for must that requires the integer to be within the given range. The endpoints are inclusive by default. You can add the word "exclusive" before a value to make the comparison exclusive instead. Using a '*' indicates no limit at that end of the range.
+Returns a predicate for must that requires the integer to be within the given
+range. The endpoints are inclusive by default. You can add the word "exclusive"
+before a value to make the comparison exclusive instead. Using a '*' indicates
+no limit at that end of the range.
+
+=head2 one_of
+
+    must => one_of(qw( a b c )),
+
+Returns a predicate that requires the value to exactly match one of the
+enumerated values.
 
 =head2 split_by
 

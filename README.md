@@ -9,7 +9,7 @@ FormValidator::Tiny - A tiny form validator
 
 # VERSION
 
-version 0.002
+version 0.003
 
 # SYNOPSIS
 
@@ -119,6 +119,7 @@ This module exports three sets of functions, each with their own export tag:
     - length\_in\_range
     - equal\_to
     - number\_in\_range
+    - one\_of
 
 - :filters
 
@@ -126,6 +127,10 @@ This module exports three sets of functions, each with their own export tag:
 
     - split\_by
     - trim
+
+- :all
+
+    All of the above.
 
 # FUNCTIONS
 
@@ -237,7 +242,17 @@ the value must be exactly equal to another field in the input.
     must => number_in_range(100, 500)
     must => number_in_range(exclusive => 100, exclusive => 500)
 
-Returns a predicate for must that requires the integer to be within the given range. The endpoints are inclusive by default. You can add the word "exclusive" before a value to make the comparison exclusive instead. Using a '\*' indicates no limit at that end of the range.
+Returns a predicate for must that requires the integer to be within the given
+range. The endpoints are inclusive by default. You can add the word "exclusive"
+before a value to make the comparison exclusive instead. Using a '\*' indicates
+no limit at that end of the range.
+
+## one\_of
+
+    must => one_of(qw( a b c )),
+
+Returns a predicate that requires the value to exactly match one of the
+enumerated values.
 
 ## split\_by
 
