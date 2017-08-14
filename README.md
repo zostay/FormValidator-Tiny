@@ -9,7 +9,7 @@ FormValidator::Tiny - A tiny form validator
 
 # VERSION
 
-version 0.003
+version 0.004
 
 # SYNOPSIS
 
